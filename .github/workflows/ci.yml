@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install root dependencies
+        run: npm ci
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+      - name: Frontend type-check
+        working-directory: ./frontend
+        run: npm run type-check
+      - name: Frontend build
+        working-directory: ./frontend
+        run: npm run build
+      - name: Frontend lint
+        working-directory: ./frontend
+        run: npm run lint
+      - name: Backend install
+        working-directory: ./backend
+        run: npm ci
+      - name: Backend type-check
+        working-directory: ./backend
+        run: npm run type-check
+      - name: Backend build
+        working-directory: ./backend
+        run: npm run build
+      - name: Docker build frontend image
+        run: docker build -f Dockerfile.frontend .
+      - name: Docker build backend image
+        run: docker build -f Dockerfile.backend .
+      - name: Run placeholder tests
+        run: echo "No tests defined"

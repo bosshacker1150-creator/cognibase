@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cognibase_user
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: cognibase
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      DATABASE_URL: postgres://cognibase_user:secretpassword@postgres:5432/cognibase
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+volumes:
+  pgdata:
